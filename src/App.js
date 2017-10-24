@@ -12,8 +12,7 @@ function Stats(props) {
 			</div>
 	)
 }
-
-const BarraProgreso = ({ respuestas }) => {
+const progressBar = ({ respuestas }) => {
     return (
         <div>
             <div className="progress-label">
@@ -23,12 +22,28 @@ const BarraProgreso = ({ respuestas }) => {
         </div>
     );
 }
+const Opciones = ({ opciones, comparar }) => {
+    return (
+        <Row>
+            {Object.keys(opciones).map((key, index) => {
+                let value = opciones[key];
+                return (
+                    <Col md={4} className={comparar===value ? 'seleccionado' : ''}>
+                        <Button key={index} onClick={() => guardarRespuesta(value)}>
+                            <span>{key}</span>{value}
+                        </Button>
+                    </Col>
+                );
+            })}
+        </Row>
+    );
+}
 
-const CreateQuestions = ({ question, respuestas, contar }) => {
+const CrearPreguntas = ({ question, respuestas, contar }) => {
     return (
         <div>
             <h1> {question.pregunta} </h1>
-            
+            <Opciones opciones={question.opciones} comparar={respuestas[contar]} />
         </div>
     );
 }
@@ -48,8 +63,8 @@ const CreateQuestions = ({ question, respuestas, contar }) => {
                 })
             }
             <div className='text-center'>
-                {comparar && <Button className='btn-dark' bsSize="large" >Start Again</Button>}
-                {!comparar && <Button className='btn-dark' bsSize="large" >Submit</Button>}
+                {comparar && <Button  onClick={() => reiniciar()}>Start Again</Button>}
+                {!comparar && <Button  onClick={() => compararRespuestas()}>Submit</Button>}
             </div>
         </div>
     );
@@ -67,10 +82,10 @@ const App = ({ quiz, contar, completo, comparar, respuestas }) => {
       <div className="cajita">
 		  <Stats />
         {!comparar &&
-          <BarraProgreso respuestas={respuestas.length} preguntas={quiz.length} />
+          <progressBar respuestas={respuestas.length} preguntas={quiz.length} />
         }
         <div>
-          {!completo && <CreateQuestions question={preguntaActual} respuestas={respuestas} contar={contar} />}
+          {!completo && <CrearPreguntas question={preguntaActual} respuestas={respuestas} contar={contar} />}
           {completo && <ListarRespuestas comparar={comparar} respuestas={respuestas} preguntas={quiz} />}
         </div>
       </div>

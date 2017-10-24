@@ -40,7 +40,7 @@ export const guardarRespuesta = (value) => {
             check: false,
             respuestas: result
         })
-    let time = setTimeout(() => {
+    let t = setTimeout(() => {
     let cont = store.getState().cont;
               if (cont === questions.length - 1) {
         store.setState({
@@ -59,6 +59,19 @@ export const guardarRespuesta = (value) => {
 export const obtenerCorrectas = () => {
     let questions = [...store.getState().quiz];
     let answers = [...store.getState().respuestas];
-
     return answers.filter((item, index) => item == questions[index].respuesta).length;
+}
+export const compararRespuestas = () => {
+    store.setState({
+        comparar: true
+    });
+}
+
+export const reiniciar = () => {
+    store.setState({
+        cont: 0,
+        comparar: false,
+        completo: false,
+        respuestas: []
+    });
 }
