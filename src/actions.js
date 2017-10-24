@@ -28,39 +28,37 @@ export const decrementScore = (index) => {
 	})
 };
 
-export const addPlayer = (name) => {
+export const guardarRespuesta = (value) => {
+    let result = [...store.getState().respuestas];
+    let index = store.getState().cont;
+    let check = store.getState().check;
+    let questions = [...store.getState().quiz];
 
-	let date = new Date();
-	let day = date.getDate();
-	let month = date.getMonth()+1;
-	let year = date.getFullYear();
-
-	const addPlayerList = [...store.getState().players,   {
-		id : store.getState().players.length + 1,
-		name: name,
-		score: 0,
-		created: `${month}/${day}/${year}`
-	}];
-
-	store.setState({
-		players: addPlayerList
-	})
+    if (check) {
+        result[index] = value;
+        store.setState({
+            check: false,
+            respuestas: result
+        })
+    let time = setTimeout(() => {
+    let cont = store.getState().cont;
+              if (cont === questions.length - 1) {
+        store.setState({
+            completo: true
+        });
+    }
+        cont++;
+        store.setState({
+        check: true,
+        cont: cont,
+                
+        })
+        }, 1000);
+    }
 }
+export const obtenerCorrectas = () => {
+    let questions = [...store.getState().quiz];
+    let answers = [...store.getState().respuestas];
 
-
-export const removePlayer = (index) => {
-	const addPlayerList =  store.getState().players.filter( (item, idx) => idx != index );
-
-	store.setState({
-		players: addPlayerList
-	})
-}
-
-
-export const selectPlayer = (index) => {
-
-
-	store.setState({
-		selectedPlayerIndex : index
-	})
+    return answers.filter((item, index) => item == questions[index].respuesta).length;
 }

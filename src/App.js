@@ -2,91 +2,82 @@
 import logo from './logo.svg';
 import React, {Component} from 'react';
 import { connect } from "redux-zero/react";
-import { incrementScore, decrementScore, addPlayer, removePlayer, selectPlayer } from "./actions";
+import { incrementScore, decrementScore, guardarRespuesta, compararRespuestas, obtenerCorrectas, reiniciar } from "./actions";
 import './App.css';
-
-
-const Player = ({pregunta, respuesta, imagen, opciones}) => {
-	return (
-		<div >
-			<img src={imagen} alt=""/>
-			<div>
-				<h1>{pregunta}</h1>
-			</div>
-			<div>
-				<button> {respuesta} </button>
-			</div>
-		</div>
-	);
-}
+import {  ProgressBar, Row, Grid, Col, Image, Button, } from 'react-bootstrap';
 
 function Stats(props) {
-	var totalPlayers = props.players.length;
-	var totalPoints = props.players.reduce(function (total, player) {
-		return total + player.score;
-	}, 0);
-
-	return (
-		<div>
+	return (<div>
 			Barra de carga
 			</div>
 	)
 }
 
-const Option = ( {index, option, model} ) => {
-   const onOptionSelect = (e) =>  {
-      console.log('value: ', option);
-      model.setAnswerAt(option, index);
-   };
+const BarraProgreso = ({ respuestas }) => {
+    return (
+        <div>
+            <div className="progress-label">
+                {respuestas} of {5} answered
+            </div>
+            <ProgressBar now={respuestas * 20} />
+        </div>
+    );
+}
 
-   return (
-      <div>
-         <div>
-            <span> { String.fromCharCode(65 + index)} -  </span>
-            <button onClick = {onOptionSelect} >  {option} </button>
-         </div>
-      </div>);
-};
+const CreateQuestions = ({ question, respuestas, contar }) => {
+    return (
+        <div>
+            <h1> {question.pregunta} </h1>
+            
+        </div>
+    );
+}
+ const ListarRespuestas = ({ comparar, preguntas, respuestas }) => {
+    let correctas = obtenerCorrectas();
+    return (
+        <div>
+            <h1>
+                {!comparar && 'Here are you answers:'}
+                {correctas + ' out of ' + preguntas.length + ' correct!'}
+            </h1>
+            {
+                respuestas.map((item, index) => {
+                    let clase = comparar ? (item == preguntas[index].respuesta ? 'text-success' : 'text-danger') : '';
+                    let contenido = clase == 'text-danger' ? <strong><strike>{item}</strike> {preguntas[index].respuesta}</strong> : <strong>{item}</strong>;
+                    return <p className={clase}>{index + 1}. {preguntas[index].pregunta} {contenido}</p>;
+                })
+            }
+            <div className='text-center'>
+                {comparar && <Button className='btn-dark' bsSize="large" >Start Again</Button>}
+                {!comparar && <Button className='btn-dark' bsSize="large" >Submit</Button>}
+            </div>
+        </div>
+    );
+}
 
-
-const App = ({players, selectedPlayerIndex}) => {
-	const onSubmit = (e) => {
-		e.preventDefault();
-		console.log ( 'this..', this);//con truco, es el connect el this.
-		addPlayer(this.playerInputRef.value)
-	}
-	const playerComponents =  players.map ( (player, index) => {
-			return <Player
-					key = {index}
-					pregunta={player.pregunta}
-					respuesta={player.respuesta}
-					imagen={player.imagen}
-					increment={ () => incrementScore(index)}
-					decrement={ () => decrementScore(index)}
-					removePlayer={ () => removePlayer (index) }
-					selectPlayer={ () => selectPlayer (index) }
- 				/>
-		})
-
-	let selectedPlayer;
-	if(selectedPlayerIndex !== -1){
-		selectedPlayer = players[selectedPlayerIndex];
-	}
-
-	return (
-		<div className="scoreboard">
-			<div className="header">
-				<Stats players={players}/>
-				<h1>TRIVIA</h1>
-			</div>
-			<div className="cajita">
-				{playerComponents}
-			</div>
-		</div>
+const App = ({ quiz, contar, completo, comparar, respuestas }) => {
+  const preguntaActual = quiz[contar];
+  console.log ( 'this..', this);//con truco, es el connect el this.
+  return (
+    <div >
+      <header>
+        {!completo && <Image src={preguntaActual.imagen} />}
+        
+      </header>
+      <div className="cajita">
+		  <Stats />
+        {!comparar &&
+          <BarraProgreso respuestas={respuestas.length} preguntas={quiz.length} />
+        }
+        <div>
+          {!completo && <CreateQuestions question={preguntaActual} respuestas={respuestas} contar={contar} />}
+          {completo && <ListarRespuestas comparar={comparar} respuestas={respuestas} preguntas={quiz} />}
+        </div>
+      </div>
+    </div>
+	
 	);
 }
 
-const mapToProps = ({players, selectedPlayerIndex}) => ({players, selectedPlayerIndex});
-
+const mapToProps = ({ quiz, contar, completo, comparar, respuestas }) => ({ quiz, contar, completo, comparar, respuestas });
 export default connect(mapToProps)(App);
-
